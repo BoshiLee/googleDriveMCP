@@ -24,6 +24,17 @@ const oauth2Client = new google.auth.OAuth2(
 let token: any = null
 let isAuthenticated = false
 
+// OAuth scopes - use full drive access for better compatibility
+const SCOPES = [
+  'https://www.googleapis.com/auth/drive',  // Full access to all Drive files
+]
+
+export interface ReauthorizeResult {
+  success: boolean
+  message: string
+  scopes?: string[]
+}
+
 // Check if token exists and load it
 function loadToken(): boolean {
   try {
@@ -44,10 +55,8 @@ async function startAuthFlow(): Promise<void> {
   return new Promise((resolve, reject) => {
     const authUrl = oauth2Client.generateAuthUrl({
       access_type: 'offline',
-      scope: [
-        'https://www.googleapis.com/auth/drive.readonly',
-        'https://www.googleapis.com/auth/drive.file'
-      ],
+      scope: SCOPES,
+      prompt: 'consent',  // Force consent screen to ensure new scopes are applied
     })
 
     console.error('='.repeat(60))
@@ -121,6 +130,36 @@ oauth2Client.on('tokens', (tokens) => {
     fs.writeFileSync(TOKEN_PATH, JSON.stringify(newToken, null, 2))
   }
 })
+
+// Reauthorize: delete token and start new auth flow
+export async function reauthorize(): Promise<ReauthorizeResult> {
+  try {
+    // Delete existing token
+    if (fs.existsSync(TOKEN_PATH)) {
+      fs.unlinkSync(TOKEN_PATH)
+      console.error('Existing token deleted.')
+    }
+
+    // Reset state
+    token = null
+    isAuthenticated = false
+    oauth2Client.setCredentials({})
+
+    // Start new auth flow
+    await startAuthFlow()
+
+    return {
+      success: true,
+      message: 'Reauthorization completed successfully. New token saved.',
+      scopes: SCOPES,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Reauthorization failed: ${error}`,
+    }
+  }
+}
 
 // Export initialization promise and drive client
 export const initPromise = initialize()

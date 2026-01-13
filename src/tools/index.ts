@@ -4,6 +4,7 @@ import { registerListFilesInFolderTool } from './listFilesInFolder.tools.js'
 import { registerReturnFileTool } from './returnFile.tools.js'
 import { registerUploadFileTool } from './uploadFile.tools.js'
 import { registerUpdateFileTool } from './updateFile.tools.js'
+import { registerReauthorizeTool } from './reauthorize.tools.js'
 
 export function registerAllTools(server: McpServer) {
   registerListAllFoldersTool(server)
@@ -11,4 +12,5 @@ export function registerAllTools(server: McpServer) {
   registerReturnFileTool(server)
   registerUploadFileTool(server)
   registerUpdateFileTool(server)
+  registerReauthorizeTool(server)
 }
