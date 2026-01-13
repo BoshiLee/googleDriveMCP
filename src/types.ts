@@ -28,6 +28,12 @@ export interface ReturnFileResponse {
   message?: string
 }
 
+export interface UploadFileResponse {
+  success: boolean
+  file?: File
+  message?: string
+}
+
 export interface File {
   id: string | null | undefined
   name: string | null | undefined
